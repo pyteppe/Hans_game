@@ -1,0 +1,50 @@
+directions: x, y     ; x > 0 => right, y > 0 => down
+velocity = vel
+acceleration = acc
+
+
+
+
+basic setup:
+
+
+import pygame
+
+
+class Main():
+    def __init__(self):
+        pygame.init()
+
+        self.WIDTH = 800
+        self.HEIGHT = 500
+
+        self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
+        self.clock = pygame.time.Clock()
+
+
+        
+
+    def loop(self):
+        running = True
+
+        while running:
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+            self.screen.fill((200, 200, 200))
+
+
+
+
+            pygame.display.update()
+
+            pygame.display.flip()
+            
+
+            self.clock.tick(60)
+
+
+if __name__ == "__main__":
+    runn = Main()
+    runn.loop()
