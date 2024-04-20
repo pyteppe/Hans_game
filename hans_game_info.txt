@@ -1,6 +1,15 @@
 directions: x, y     ; x > 0 => right, y > 0 => down
 velocity = vel
 acceleration = acc
+player,  0: hans, 1: david, 2: thomas, 3: jaran ...
+minion/boss,  0: david, 1: thomas, 2: jaran ...
+
+sprite groops:
+    wind
+    mobs
+    player
+
+
 
 
 
@@ -9,8 +18,7 @@ basic setup:
 
 
 import pygame
-
-
+import time
 class Main():
     def __init__(self):
         pygame.init()
@@ -26,9 +34,10 @@ class Main():
 
     def loop(self):
         running = True
-
+        previous_time = time.time()
         while running:
-
+            self.dt = time.time()-previous_time
+            previous_time = time.time()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -38,10 +47,7 @@ class Main():
 
 
             pygame.display.update()
-
             pygame.display.flip()
-            
-
             self.clock.tick(60)
 
 

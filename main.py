@@ -1,5 +1,5 @@
 
-import pygame
+import pygame, time
 from game import Game
 
 
@@ -7,8 +7,9 @@ class Main(Game):
     def __init__(self):
         pygame.init()
 
-        self.WIDTH = 800
+        self.WIDTH = 900
         self.HEIGHT = 500
+        self.dt = 0
 
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         pygame.display.set_caption("Hans game")
@@ -20,27 +21,26 @@ class Main(Game):
         Game.__init__(self) # Game mecanics to be initialised
 
 
-        
 
     def loop(self):
         running = True
 
+        previous_time = time.time()
         while running:
+            
+            self.dt = time.time()-previous_time
+            previous_time = time.time()
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-            self.screen.fill((200, 200, 200))
-            self.display_background()
 
             self.in_game_loop() # Game mecanics to loop
 
             pygame.display.update()
-            pygame.display.flip()
+            pygame.display.flip() 
 
-            self.clock.tick(60)
-
-
+            
 if __name__ == "__main__":
     runn = Main()
     runn.loop()

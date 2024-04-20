@@ -17,9 +17,9 @@ class Lives:
         self.bottom_color_life_bar = bottom_color
         self.life_bar_radius = bar_radius
 
-    def uppdate_life(self, life_taken=0, life_given=0):
-        self.lives += life_given
-        self.lives -= life_taken
+        self.player_top_left_lifebar = (self.WIDTH*1/40, self.HEIGHT*1/25)
+
+    def uppdate_life(self):
         if self.lives > self.max_lives:
             self.lives = self.max_lives
         elif self.lives < 0:
@@ -59,20 +59,19 @@ class Lives:
         display_text(self.screen, self.name, center_pos_text, font=None, text_size=50, text_color=(0, 0, 0))
 
 
-    def display_player_life_bar(self, width, height, radius=None, new_top_left_pos=None, top_color=None, bottom_color=None):
+    def display_player_life_bar(self, width, height, radius=None, new_top_left=None, top_color=None, bottom_color=None):
         self.uppdate_life()
-        top_left_pos = (self.WIDTH*1/40, self.HEIGHT*1/25)
+        if new_top_left:
+            self.player_top_left_lifebar = new_top_left
 
         if bottom_color:
             self.bottom_color = bottom_color
         if top_color:
             self.top_color_life_bar = top_color
-        if new_top_left_pos:
-            top_left_pos = new_top_left_pos
         if radius:
             self.life_bar_radius = radius
 
-        display_bar(self.screen, width, height, self.lives, self.max_lives, self.life_bar_radius, top_left_pos, self.top_color_life_bar, self.bottom_color_life_bar)
+        display_bar(self.screen, width, height, self.lives, self.max_lives, self.life_bar_radius, self.player_top_left_lifebar, self.top_color_life_bar, self.bottom_color_life_bar)
 
 
 
@@ -89,9 +88,9 @@ class Jaaa(Lives):
         self.WIDTH = WIDTH
         self.HEIGHT = HEIGHT
         self.name = "Thomas"
-        self.surf = pygame.image.load("art\general_art\Projectile\spike\spike_2.jpg")
-        self.surf = pygame.transform.scale(self.surf, (200, 200))
-        self.rect = self.surf.get_rect(topleft=(200, 200))
+        self.image = pygame.image.load("art\general_art\Projectile\spike\spike_2.jpg")
+        self.image = pygame.transform.scale(self.image, (200, 200))
+        self.rect = self.image.get_rect(topleft=(200, 200))
         
         super().__init__(500, 500, bar_radius=5)
 
@@ -127,7 +126,7 @@ class Main():
                     running = False
             self.screen.fill((200, 200, 200))
 
-            self.screen.blit(self.ja.surf, self.ja.rect)
+            self.screen.blit(self.ja.image, self.ja.rect)
             self.ja.damage()
 
             self.ja.display_player_life_bar(120, 20)

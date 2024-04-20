@@ -16,10 +16,11 @@ class Button():
         self.disabled_color = disabled_color
 
         # text
-        self.text_surf = text_font.render(text, True, text_color)
-        self.text_surf_default = text_font.render(text, True, text_color)
-        self.hover_text_surf = text_font.render(text, True, hover_text_color)
-        self.disabled_text_surf = text_font.render(text, True, disabled_text_color)
+        self.text_info = text
+        self.text_image = text_font.render(text, True, text_color)
+        self.text_image_default = text_font.render(text, True, text_color)
+        self.hover_text_image = text_font.render(text, True, hover_text_color)
+        self.disabled_text_image = text_font.render(text, True, disabled_text_color)
         self.border_radius = border_radius
 
         # Top rect
@@ -27,7 +28,7 @@ class Button():
         
         self.top_rect_default = pygame.Rect((pos[0]+abs(press_height)/2, pos[1]-abs(press_height)), (width, height))
         
-        self.text_rect = self.text_surf.get_rect(center=self.top_rect.center)
+        self.text_rect = self.text_image.get_rect(center=self.top_rect.center)
         self.default_y_pos = pos[1]
         self.default_x_pos = pos[0]
 
@@ -57,10 +58,10 @@ class Button():
 
         self.top_rect.y = self.default_y_pos - self.press_height
         self.top_rect.x = self.default_x_pos + self.press_height/2
-        self.text_rect = self.text_surf.get_rect(center=self.top_rect.center)
+        self.text_rect = self.text_image.get_rect(center=self.top_rect.center)
             
         pygame.draw.rect(self.screen, self.top_color, self.top_rect, border_radius=self.border_radius)
-        self.screen.blit(self.text_surf, self.text_rect)
+        self.screen.blit(self.text_image, self.text_rect)
         return clicking
 
     def draw_disabled_button(self, new_pos=None):
@@ -70,11 +71,11 @@ class Button():
 
         self.top_rect.y = self.default_y_pos - self.press_height
         self.top_rect.x = self.default_x_pos + self.press_height/2
-        self.text_rect = self.text_surf.get_rect(center=self.top_rect.center)
+        self.text_rect = self.text_image.get_rect(center=self.top_rect.center)
         locked_rect = self.locked_image.get_rect(center=self.top_rect.center)
 
         pygame.draw.rect(self.screen, self.disabled_color, self.top_rect, border_radius=self.border_radius)
-        self.screen.blit(self.disabled_text_surf, self.text_rect)
+        self.screen.blit(self.disabled_text_image, self.text_rect)
         self.screen.blit(self.locked_image, locked_rect)
 
     
@@ -85,7 +86,7 @@ class Button():
 
         if self.top_rect.collidepoint(mouse_pos) or self.top_rect_default.collidepoint(mouse_pos):
             pygame.draw.rect(self.screen, self.bottom_color, self.bottom_rect, border_radius=self.border_radius)
-            self.text_surf = self.hover_text_surf
+            self.text_image = self.hover_text_image
             self.top_color = self.hover_color
             if pygame.mouse.get_pressed()[0]:
                 self.cliked = True
@@ -98,10 +99,13 @@ class Button():
         else:
             self.top_color = self.top_color_default
             self.press_height = self.press_height_default
-            self.text_surf = self.text_surf_default
+            self.text_image = self.text_image_default
             if self.cliked:
                 if not pygame.mouse.get_pressed()[0]:
                     self.cliked = False
                     
 
         return False
+    
+    def __repr__(self):
+        return "Button saying (" + self.text_info + ")"

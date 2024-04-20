@@ -3,44 +3,43 @@ import sys
 sys.path.append("art")
 from animations import Animations
 from general import General
-from importing_image import importing_image_animations
+from animations import Animations
 
     
     
 
 class Projectile(pygame.sprite.Sprite, Animations, General):
-    def __init__(self, screen, velocity: list, acceleration: list, center_pos: tuple, size:tuple, animation_images_path: str, animation_speed, hostile_for_player=False, acceleration_acceleration=[0, 0], life_amount=1, max_life=1):
-
-        # Movement
-        
-        self.animation_list = importing_image_animations(animation_images_path)
-        for n, i in enumerate(self.animation_list):
-            self.animation_list[n] = pygame.transform.scale(i, size)
-        self.animation_speed = animation_speed
-        
-        self.rect = self.animation_list[0].get_rect(center=center_pos)
+    def __init__(self, screen, velocity: list, acceleration: list, center_pos: tuple, animation_dict: dict, animation_speed, hostile_for_player=False, acceleration_acceleration=[0, 0], life_amount=1, max_life=1):
         self.screen = screen
+        
+        self.animation_dict = animation_dict
+        self.normal_animation_list = self.animation_dict["normal"]
+        self.animation_speed = animation_speed
+
         self.hostile_for_player = hostile_for_player
 
+        self.image = self.normal_animation_list[0]
+        self.rect = self.image.get_rect(center=center_pos)
+
         # Initialise
-        Animations.__init__(self, {"projectile": self.animation_list})
         pygame.sprite.Sprite.__init__(self)
         General.__init__(self, life_amount, max_life, acceleration, velocity, acceleration_acceleration=acceleration_acceleration)
 
 
-    def draw_and_update(self, stop):
-        if not stop:
-            self.move_projectile()
-            self.execute_animation(self.animation_list, self.animation_speed)
-        self.screen.blit(self.surf, self.rect)
+    def update(self, dt):
+        self.dt = dt
+        self.execute_movement(desimal_movement=True)
+        self.execute_animation(self.normal_animation_list, self.animation_speed)
+        self.screen.blit(self.image, self.rect)
         
 
 
 
 
-class Wind(Projectile):
-    def __init__(self, screen, speed: list, acceleration: list, center_pos: tuple, size:tuple, hostile_for_player, acceleration_acceleration=[0, 0]):
-        Projectile.__init__(self, screen, speed, acceleration,center_pos, size, "art\general_art\Projectile/tornado", 0.5, hostile_for_player=hostile_for_player, acceleration_acceleration=acceleration_acceleration)
+class Wind(Projectile, Animations):
+    def __init__(self, screen, screen_size, animation_speed: list, velocity: list, acceleration: list, center_pos: tuple, hostile_for_player, acceleration_acceleration: list=[0, 0]):
+        Animations.__init__(self, screen_size)
+        Projectile.__init__(self, screen, velocity, acceleration, center_pos, self.wind_animation_dict, animation_speed, hostile_for_player=hostile_for_player, acceleration_acceleration=acceleration_acceleration)
         
         
         
@@ -48,7 +47,7 @@ class Wind(Projectile):
 
         
         
-
+import time
 class LocalMain():
     def __init__(self):
         pygame.init()
@@ -59,22 +58,23 @@ class LocalMain():
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         self.clock = pygame.time.Clock()
 
-        self.wind = Wind(self.screen, [2, 1], [0.15, 0], (self.WIDTH/2, self.HEIGHT/2), (40, 50), False, acceleration_acceleration=[-0.002, 0])
-        self.wind2 = Wind(self.screen, [-2, -1], [0, 0], (self.WIDTH/2, self.HEIGHT/2), (40, 50), False)
+        self.wind = Wind(self.screen, (self.WIDTH, self.HEIGHT), 20, [-200, 100], [0, 0], (self.WIDTH/2, self.HEIGHT/2), hostile_for_player=False)
+        self.wind2 = Wind(self.screen, (self.WIDTH, self.HEIGHT), 20, [-100, 100], [0, 0], (self.WIDTH/2, self.HEIGHT/2), hostile_for_player=False)
         
 
     def loop(self):
         running = True
-
+        previous_time = time.time()
         while running:
-
+            self.dt = time.time()-previous_time
+            previous_time = time.time()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
             self.screen.fill((200, 200, 200))
 
-            self.wind.draw_and_update(False)
-            self.wind2.draw_and_update(False)
+            self.wind.update(self.dt)
+            self.wind2.update(self.dt)
 
 
 
