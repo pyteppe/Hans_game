@@ -7,6 +7,7 @@ from general import General
 from only_once import OnlyOnce
 from ground import Ground
 from abilities import Crouch, Jump, Blow
+from projectile import Wind
 from animations import Animations, ExecuteAnimation
 
 
@@ -17,12 +18,18 @@ class GeneralBoss(pygame.sprite.Sprite, General, ExecuteAnimation):
         self.WIDTH = screen_size[0]
         self.HEIGHT = screen_size[1]
         self.animation_speed = animation_speed
+        self.dt = 0
+        self.animation_once = False
+        self.animation_executed_once_done = False
+
+        self.dying = False
+        self.back_wards = False
 
         pygame.sprite.Sprite.__init__(self)
         General.__init__(self, life_amount=life_amount, max_life=max_life, acceleration=[0, 0], velocity=initial_velocity)
         ExecuteAnimation.__init__(self)
 
-        self.image = self.current_animation[0]
+        self.image = self.current_animation[0].copy()
         self.rect = self.image.get_rect(bottomleft=botom_left_pos)
 
 
@@ -32,7 +39,12 @@ class GeneralBoss(pygame.sprite.Sprite, General, ExecuteAnimation):
         self.ground = ground
         self.spesific_boss_update()
         self.execute_movement()
-        self.execute_animation(self.current_animation, self.animation_speed)
+        if self.animation_once:
+            self.animation_executed_once_done = self.execute_animation_once(self.animation_speed)
+        else:
+            self.animation_executed_once_done = False
+            self.execute_animation(self.animation_speed)
+        self.update_damage() # Må vere etter execute_animation
         self.display_boss_life_bar(500, 10)
 
 
@@ -40,48 +52,74 @@ class GeneralBoss(pygame.sprite.Sprite, General, ExecuteAnimation):
 
 class DavidBoss(GeneralBoss):
     def __init__(self, screen, animations_instance: Animations, screen_size, botom_left_pos):
+        self.animations = animations_instance
         self.animation_dict = animations_instance.all_boss_amination_dicts_list[0]
         self.boss_size = animations_instance.david_bos_size
         self.current_animation = self.animation_dict["crawling"]
-        GeneralBoss.__init__(self, screen, screen_size, "David", life_amount=3, max_life=3, initial_velocity=[0, 0], botom_left_pos=botom_left_pos, animation_speed=1)
-        self.do_approach = True
+        GeneralBoss.__init__(self, screen, screen_size, "David", life_amount=3, max_life=3, initial_velocity=[0, 0], botom_left_pos=botom_left_pos, animation_speed=2)
 
-    def approach(self):
-        if self.move_to(right=self.WIDTH, centery=self.ground.rect.top, speed=60):
-            self.velocity = [-300, 0]
-
-
-            self.do_approach = False
-
-        
+        self.crawling = True
 
     def spesific_boss_update(self):
         # (x = a y³ + b)=>(y=((x-b)/a)**(1/3)) brukte denne likninga y er animasjon og x er fart, a er konstant og b er bakkefarta
-        self.animation_speed = 1/5*(25)**(1/3)*(-self.velocity[0]+self.ground.velocity[0])**(1/3)
+        self.animation_speed = 1/10*(25)**(1/3)*(-self.velocity[0]+self.ground.velocity[0])**(1/3)
         if isinstance(self.animation_speed, complex):
             self.animation_speed = -abs(self.animation_speed)
 
+        self.chosse_and_change_animation()
         
+        
+    def chosse_and_change_animation(self):
+        if self.dying:
+            self.current_animation = self.animation_dict["dying"]
+        elif self.crawling:
+            self.current_animation = self.animation_dict["crawling"]
 
-        if self.do_approach:
-            self.approach()
+        if self.back_wards:
+            self.current_animation = self.turn_around(self.current_animation)
 
 
-class ThomasBoss(GeneralBoss):
-    def __init__(self, screen, animations_instance: Animations):
+class ThomasBoss(GeneralBoss, Blow):
+    def __init__(self, screen, animations_instance: Animations, screen_size, botom_left_pos):
+        self.animations = animations_instance
         self.animation_dict = animations_instance.all_boss_amination_dicts_list[1]
         self.boss_size = animations_instance.thomas_bos_size
         self.current_animation = self.animation_dict["flying"]
-        GeneralBoss.__init__(self, screen, "Thomas", life_amount=3, max_life=3)
-    
-    def approach(self):
-        pass
+        GeneralBoss.__init__(self, screen, screen_size, "Thomas", life_amount=3, max_life=3, initial_velocity=[0, 0], botom_left_pos=botom_left_pos, animation_speed=2)
+        Blow.__init__(self)
+
+        self.blowing_direction = [0, 0]
+        self.blowing = False
+        self.flying = True
+        self.charging = False
     
     def spesific_boss_update(self):
-        pass
-
-
-
+        self.chosse_and_change_animation()
+    
+    def chosse_and_change_animation(self):
+        previous = self.current_animation.copy()
+        if self.dying:
+            self.current_animation = self.animation_dict["dying"]
+        elif self.blowing:
+            if self.blowing_direction == [0, 0]:
+                self.current_animation = self.animation_dict["blowing"]
+            elif self.blowing_direction[0] < 0:
+                self.current_animation = self.animation_dict["blowing_forward"]
+            elif self.blowing_direction[0] > 0:
+                self.current_animation = self.turn_around(self.animation_dict["blowing_forward"])
+            elif self.blowing_direction[1] < 0:
+                self.current_animation = self.animation_dict["blowing_upp"]
+            elif self.blowing_direction[1] > 0:
+                self.current_animation = self.animation_dict["blowing_down"]
+        elif self.charging:
+            self.current_animation = self.animation_dict["charging"]
+        elif self.flying:
+            self.current_animation = self.animation_dict["flying"]
+        if self.back_wards:
+            self.current_animation = self.turn_around(self.current_animation)
+        if self.current_animation != previous:
+            self.start_once_animation = True
+            self.rect = self.current_animation[0].get_rect(center=self.rect.center)
 
 
 

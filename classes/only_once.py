@@ -5,7 +5,7 @@ class OnlyOnce:
     def __init__(self):
         self.done = False
     
-    def do_once(self, thing: bool):
+    def dew_it(self, thing: bool):
         if not self.done and thing:
             self.done = True
             return True

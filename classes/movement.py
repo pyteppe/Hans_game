@@ -80,14 +80,12 @@ class Movement:
         direction_with_speed_one = [direction[0]/length, direction[1]/length]
 
         self.velocity = [direction_with_speed_one[0]*speed, direction_with_speed_one[1]*speed]
-
-        self.execute_movement()
-
+        
         return False
         
 
     def turn_around(self, animation: list, flip_x=True, flip_y = False):
-        return [pygame.transform.flip(image, flip_x=flip_x, flip_y=flip_y) for image in animation]
+        return [pygame.transform.flip(image.copy(), flip_x=flip_x, flip_y=flip_y) for image in animation]
     
 
 

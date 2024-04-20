@@ -1,8 +1,11 @@
 from msilib.schema import Error
 import sys
 sys.path.append("art")
+sys.path.insert(1, 'important_classes\player.py')
 from display import display_text, display_bar
 import pygame
+from timer import Timer2
+from only_once import OnlyOnce
 
 class Lives:
     def __init__(self, life_amount, max_life, top_color=(255, 0, 0), bottom_color=(114, 114, 114), bar_radius=4):
@@ -18,6 +21,9 @@ class Lives:
         self.life_bar_radius = bar_radius
 
         self.player_top_left_lifebar = (self.WIDTH*1/40, self.HEIGHT*1/25)
+
+        self.damage_time = Timer2(0.2)
+        self.is_being_damaged = False
 
     def uppdate_life(self):
         if self.lives > self.max_lives:
@@ -43,6 +49,7 @@ class Lives:
 
     def display_boss_life_bar(self, width, height, radius=None, new_top_left_pos=None, top_color=None, bottom_color=None):
         self.uppdate_life()
+   
         top_left_pos = (self.WIDTH/2-width/2, self.HEIGHT*1/12)
 
         if bottom_color:
@@ -73,6 +80,18 @@ class Lives:
 
         display_bar(self.screen, width, height, self.lives, self.max_lives, self.life_bar_radius, self.player_top_left_lifebar, self.top_color_life_bar, self.bottom_color_life_bar)
 
+    def update_damage(self):
+        if self.is_being_damaged:
+            self.image.fill((255, 0, 0, 100), special_flags=pygame.BLEND_MAX)
+            if self.damage_time.time_it(self.dt):
+                self.is_being_damaged = False
+
+    def take_damage(self):
+        # Run this once
+        self.lives -= 1
+        self.is_being_damaged = True
+        if isinstance(self, str): #her skal det vere Player
+            self.stunned = False
 
 
 

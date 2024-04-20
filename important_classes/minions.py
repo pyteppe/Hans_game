@@ -18,6 +18,8 @@ class Minions(pygame.sprite.Sprite, General, ExecuteAnimation):
         self.HEIGHT = HEIGHT
         self.screen = screen
 
+        self.back_wards = False
+
         pygame.sprite.Sprite.__init__(self)
         General.__init__(self, life_amount, max_life, acceleration, velocity)
         ExecuteAnimation.__init__(self)
@@ -25,7 +27,7 @@ class Minions(pygame.sprite.Sprite, General, ExecuteAnimation):
 
 
         self.animation_types = [i for i in self.animation_dict]
-        self.image = list(self.animation_dict.values())[0][0]
+        self.image = list(self.animation_dict.values())[0][0].copy()
         self.rect = self.image.get_rect(bottomleft=botom_left_coordinate)
 
         self.current_animation = self.animation_dict[self.animation_types[0]]
@@ -43,32 +45,50 @@ class Minions(pygame.sprite.Sprite, General, ExecuteAnimation):
 
         self.spesific_minion_update()
         self.execute_movement()
+        self.execute_animation(self.animation_speed)
+        if self.lives <= 0:
+            self.kill()
         if self.lives < self.max_lives:
             self.display_normal_life_bar(30, 10)
 
         # Must see what it is doing and change rect and animation list accordingly
-        self.execute_animation(self.current_animation, self.animation_speed)
+        self.update_damage()
         
         
 
 class DavidMinions(Minions):
     def __init__(self, screen, WIDTH, HEIGHT, animation_instance):
         self.animation_dict = animation_instance.all_minion_animation_dicts_list[0]
-        super().__init__(screen, WIDTH, HEIGHT, life_amount=0.5, max_life=1, velocity=[-300, 0], acceleration=[0, 0], animation_speed=3, botom_left_coordinate=(randint(WIDTH*1.25, WIDTH*1.38), HEIGHT/4*3+40), animation_instance=animation_instance, minion=0)
+        super().__init__(screen, WIDTH, HEIGHT, life_amount=1, max_life=1, velocity=[-300, 0], acceleration=[0, 0], animation_speed=2, botom_left_coordinate=(randint(WIDTH*1.32, WIDTH*1.38), HEIGHT/4*3+40), animation_instance=animation_instance, minion=0)
+
+        self.crawling = True
 
     def spesific_minion_update(self):
-        pass
+        self.update_animation()
+
+    def update_animation(self):
+        if self.crawling:
+            self.current_animation = self.animation_dict["crawling"]
+        if self.back_wards:
+            self.current_animation = self.turn_around(self.current_animation)
+    
         
 
 class ThomasMinions(Minions):
     def __init__(self, screen, WIDTH, HEIGHT, animation_instance):
         self.animation_dict = animation_instance.all_minion_animation_dicts_list[1]
-        super().__init__(screen, WIDTH, HEIGHT, life_amount=1, max_life=1, velocity=[-300, 0], acceleration=[0, 0], animation_speed=5, botom_left_coordinate=(randint(WIDTH*1.25, WIDTH*1.38), choice([HEIGHT*0.5, HEIGHT*0.65])), animation_instance=animation_instance, minion=1)
+        super().__init__(screen, WIDTH, HEIGHT, life_amount=1, max_life=1, velocity=[-300, 0], acceleration=[0, 0], animation_speed=3, botom_left_coordinate=(randint(WIDTH*1.25, WIDTH*1.38), choice([HEIGHT*0.5, HEIGHT*0.65])), animation_instance=animation_instance, minion=1)
+
+        self.flying = True
 
     def spesific_minion_update(self):
-        pass
+        self.update_animation()
 
-
+    def update_animation(self):
+        if self.flying:
+            self.current_animation = self.animation_dict["flying"]
+        if self.back_wards:
+            self.current_animation = self.turn_around(self.current_animation)
 
 
 import time

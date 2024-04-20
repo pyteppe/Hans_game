@@ -8,7 +8,7 @@ class Main(Game):
         pygame.init()
 
         self.WIDTH = 900
-        self.HEIGHT = 500
+        self.HEIGHT = 500 
         self.dt = 0
 
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
@@ -17,8 +17,9 @@ class Main(Game):
         pygame.display.set_icon(hans_icon)
         self.clock = pygame.time.Clock()
 
+
         
-        Game.__init__(self) # Game mecanics to be initialised
+        Game.__init__(self) # Game mecanics to be initialised 
 
 
 
@@ -30,8 +31,8 @@ class Main(Game):
             
             self.dt = time.time()-previous_time
             previous_time = time.time()
-
-            for event in pygame.event.get():
+            self.events = pygame.event.get()
+            for event in self.events:
                 if event.type == pygame.QUIT:
                     running = False
 

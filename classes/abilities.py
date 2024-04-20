@@ -1,5 +1,6 @@
 
 from msilib.schema import Error
+from projectile import Wind
 
 
 class Crouch:
@@ -7,11 +8,8 @@ class Crouch:
         self.can_crouch = can_crouch
 
     def execute_crouch(self):
-        print("crouching")
-        #self.execute_animation(self.animation_dict[crouching])
+        self.is_crouching = True
 
-
-    
 
 
 class Jump():
@@ -20,29 +18,44 @@ class Jump():
         self.current_jump_amount = jump_amount
 
         self.jump_strength = jump_strength
-        self.jump_button_curently_down = False
 
     
-    def execute_jump(self, ground):
+    def execute_jump(self, ground, just_jump=False):
         
-        self.rect.bottom -= 1 # To make shure it does jump when you press jump, and it doesn't loose its velosity due to tuching og ground
+        if not self.tuching_ground_before_jump and not just_jump:
+            self.execute_blow(self.wind_group, velocity=[0, 800], acceleration=[0, 100], hostile_for_players=False)
+
+        self.rect.bottom -= 1 # To make shure it does jump when you press jump, and it doesn't loose its velosity due to tuching of ground
         self.execute_movement(just_move_pos=True)
 
         self.velocity[1] -= self.jump_strength
         self.current_jump_amount -= 1
-        #self.execute_animation(self.animation["jump"])
 
 
 
 class Blow:
     def __init__(self):
-        self.blow_direction = [0, 1]
+        self.Wind = Wind
+
+    def execute_blow(self, wind_group, velocity:list, acceleration, hostile_for_players, wind_size=64, kill_if_of_screen=True):
+        center_pos = [None, None]
+        if velocity[0] > 0:
+            center_pos[0] = self.rect.right + wind_size*0.625/2
+        elif velocity[0] == 0:
+            center_pos[0] = self.rect.centerx
+        elif velocity[0] < 0:
+            center_pos[0] = self.rect.left - wind_size*0.625/2
+
+        if velocity[1] > 0:
+            center_pos[1] = self.rect.bottom + wind_size*0.781/2
+        elif velocity[1] == 0:
+            center_pos[1] = self.rect.centery
+        elif velocity[1] < 0:
+            center_pos[1] = self.rect.top - wind_size*0.781/2
+
+        wind_group.add(self.Wind(self.screen, (self.WIDTH, self.HEIGHT), self.animations, animation_speed=3, velocity=velocity, acceleration=acceleration, center_pos=center_pos, hostile_for_player=hostile_for_players, wind_size=wind_size, kill_if_of_screen=kill_if_of_screen))
 
 
-    def execute_blow(self, direction):
-        if len(direction) != 2:
-            raise Error("Direction not in possible directions...")
-        self.blow_direction = direction
 
 
 

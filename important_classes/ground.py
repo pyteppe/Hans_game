@@ -20,7 +20,7 @@ class Ground(Movement, ExecuteAnimation):
         self.animations = animation_instance
         self.ground_animation_dict = self.animations.in_game_ground_dict
 
-        self.image = self.ground_animation_dict["normal"][0]
+        self.image = self.ground_animation_dict["normal"][0].copy()
         self.rect = self.image.get_rect(bottomleft=(0, self.HEIGHT))
         self.behind_rect = self.image.get_rect(topleft=self.rect.topright)
 
@@ -41,7 +41,7 @@ class Ground(Movement, ExecuteAnimation):
 
         self.execute_movement()
         self.behind_rect.topleft = self.rect.topright
-        self.execute_animation(self.ground_animation_dict["normal"], 0.2, dt=self.dt)
+        self.execute_animation(0.2, animation=self.ground_animation_dict["normal"], dt=self.dt)
         self.screen.blit(self.image, self.rect)
         self.screen.blit(self.image, self.behind_rect)
 

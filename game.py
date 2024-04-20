@@ -2,6 +2,7 @@ import sys
 sys.path.append("important_classes")
 sys.path.append("classes")
 sys.path.append("art")
+sys.path.append("progres_stored")
 from levels import Levels
 from display import BackGround, Display, display_text
 from animations import Animations, ExecuteAnimation
@@ -9,9 +10,10 @@ from bindings import GlobalBindings
 from player import Player
 from ground import Ground
 from only_once import OnlyOnce
+from account import Account
 import pygame
 
-class Game(Display, BackGround, GlobalBindings, Levels, ExecuteAnimation):
+class Game(Display, BackGround, GlobalBindings, Levels, ExecuteAnimation, Account):
     def __init__(self):
 
         self.animations = Animations(screen_size=(self.WIDTH, self.HEIGHT))
@@ -19,7 +21,9 @@ class Game(Display, BackGround, GlobalBindings, Levels, ExecuteAnimation):
         Display.__init__(self)
         BackGround.__init__(self)
         GlobalBindings.__init__(self)
-        Levels.__init__(self, current_level=1, max_level=3)
+        Account.__init__(self)
+
+        Levels.__init__(self, current_level=1, max_level=1)
 
         self.ground = Ground(self.screen, (self.WIDTH, self.HEIGHT), self.animations, [-200, 0])
 
@@ -30,8 +34,8 @@ class Game(Display, BackGround, GlobalBindings, Levels, ExecuteAnimation):
         self.all_minions_group = pygame.sprite.Group() 
         self.all_boss_group = pygame.sprite.Group()
         self.player_group = pygame.sprite.Group()
-        for _ in range(3):
-            self.player_group.add(Player(self.screen, self.WIDTH, self.HEIGHT, self.animations, self.ground, life_amount=2, max_life=2, acceleration=[0, 3000], velocity=[0, 0], can_crouch=False, jump_amount=1, jump_strength=800, position_top_left=(200, 200)))
+        self.wind_group = pygame.sprite.Group()
+        self.player_group.add(Player(self.screen, self.WIDTH, self.HEIGHT, self.animations, self.ground, life_amount=1, max_life=1, max_level=self.max_level, acceleration=[0, 3000], velocity=[0, 0], can_crouch=False, jump_amount=1, jump_strength=800, wind_group=self.wind_group, position_top_left=(200, 200)))
         
         
         # Menu states
@@ -40,17 +44,20 @@ class Game(Display, BackGround, GlobalBindings, Levels, ExecuteAnimation):
         self.level_menu = False
         self.pause = False
         self.game_over = False
-        self.select_player_menu = False 
         self.select_player_animation_menu = False
+        self.celebration_menu = False
+        self.sign_upp_menu = False
+        self.log_in_menu = False
 
         self.start_current_level = False
-
+        self.skip = False
         # Things to only do once
         
 
 
     def in_game_loop(self):
         self.listen_for_key_strokes()
+        self.update_account()
 
         if self.stop:
             self.display_menues(dt=self.dt)
@@ -65,10 +72,7 @@ class Game(Display, BackGround, GlobalBindings, Levels, ExecuteAnimation):
                 self.start_next_level_func()
             
             # Updating sprites
-            for player in self.player_group:
-                if player.update_player:
-                    player.update(ground=self.ground, dt=self.dt)
-            
+            self.player_group.update(ground=self.ground, dt=self.dt, max_level=self.max_level)
             
             self.update_level()
 
